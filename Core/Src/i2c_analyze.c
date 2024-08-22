@@ -3,7 +3,7 @@
 volatile static int i2c_bits[64];
 volatile static int i2c_bits_counter = 0;
 
-volatile int i2c_bytes[64];
+volatile int i2c_bytes[100];
 volatile int i2c_bytes_counter = 0;
 volatile int i2c_next_byte_counter = 0;
 
@@ -45,8 +45,6 @@ i2c_analyze_state i2c_read_data()
 		i2c_bits_counter = 0;
 		return I2C_BYTE_SAVED;
 	}
-
-
 }
 
 i2c_conversion_state i2c_is_data_ready()
@@ -138,6 +136,8 @@ int i2c_get_bytes_buffor_size()
 {
 	return i2c_bytes_count_after_stop;
 }
+
+
 
 
 

@@ -37,6 +37,11 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+typedef enum{
+	DISPLAY_MODE_DATA_ONLY,
+	DISPLAY_MODE_WHOLE_FRAME,
+}display_mode;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -56,10 +61,68 @@
   int new_data = 0;
   char new_data_char[30];
 
-  int x = 10;
-  int y = 10;
+  int x = 5;
+  int y = 5;
 
-  void start_display()
+  void start_display_whole_frame()
+    {
+  	int choosen_color = WHITE;
+
+  	int size = i2c_get_bytes_buffor_size();
+    	for(int i = 0; i < size; i++)
+    	{
+    	  switch(i)
+    	  {
+  		  case 0:
+  		  	  new_data = i2c_get_ready_i2c_byte();
+  		  	  sprintf(new_data_char, "0x%02X", new_data);
+  		  	  choosen_color = RED;
+  			  break;
+
+  		  case 1:
+  		  	  new_data = i2c_get_ready_i2c_byte();
+  		  	  sprintf(new_data_char, "0x%02X", new_data);
+  		  	  choosen_color = YELLOW;
+  			  break;
+
+  		  default:
+  		  	  new_data = i2c_get_ready_i2c_byte();
+  		  	  sprintf(new_data_char, "0x%02X", new_data);
+  		  	  choosen_color = WHITE;
+  			  break;
+    	  }
+
+    	  LCD_DisplayString( x, y, new_data_char, choosen_color);
+
+
+    	  if(x + 25 < LCD_WIDTH)
+    	  {
+    	      x = x + 22;
+    	  }
+    	  else
+    	  {
+
+    		  x = 5;
+    		  y = y + 15;
+    	  }
+    	}
+
+    	lcd_copy();
+    	HAL_Delay(10);
+
+    	i2c_reset_all();
+    	new_data = 0;
+    	for(int i = 0; i < 30; i++)
+    	{
+    		new_data_char[i] = 0;
+    	}
+
+    	fill_with(BLACK);
+    	y = 5;
+    	x = 5;
+    }
+
+  void start_display_data_only()
   {
 	int choosen_color = WHITE;
 
@@ -70,39 +133,38 @@
   	  {
 		  case 0:
 		  	  new_data = i2c_get_ready_i2c_byte();
-		  	  sprintf(new_data_char, "Device address: 0x%X", new_data);
+		  	  sprintf(new_data_char, "Device address: 0x%02X", new_data);
 		  	  choosen_color = RED;
 			  break;
 
 		  case 1:
 		  	  new_data = i2c_get_ready_i2c_byte();
-		  	  sprintf(new_data_char, "Register address: 0x%X", new_data);
+		  	  sprintf(new_data_char, "Register address: 0x%02X", new_data);
 		  	  choosen_color = YELLOW;
 			  break;
 
 		  default:
 		  	  new_data = i2c_get_ready_i2c_byte();
-		  	  sprintf(new_data_char, "D:0x%X", new_data);
+		  	  sprintf(new_data_char, "%02d:0x%02X", (i - 1), new_data);
 		  	  choosen_color = WHITE;
 			  break;
   	  }
 
   	  LCD_DisplayString( x, y, new_data_char, choosen_color);
 
-  	  if(y + 10 < LCD_HEIGHT)
+
+  	  if(y + 15 < LCD_HEIGHT)
   	  {
   	      y = y + 10;
   	  }
   	  else
   	  {
-  		  y = 30;
-  		  x = x + 35;
+  		  y = 25;
+  		  x = x + 40;
   	  }
-
-
-  	  lcd_copy();
-  	  HAL_Delay(100);
   	}
+  	lcd_copy();
+  	HAL_Delay(10);
 
   	i2c_reset_all();
   	new_data = 0;
@@ -112,11 +174,11 @@
   	}
 
   	fill_with(BLACK);
-  	y = 10;
-  	x = 10;
+  	y = 5;
+  	x = 5;
   }
 
-  int start_display_flag = 0;
+int start_display_flag = 0;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -203,7 +265,7 @@ int main(void)
   fill_with(BLACK);
   lcd_copy();
 
-
+  display_mode mode = DISPLAY_MODE_WHOLE_FRAME;
 
   /* USER CODE END 2 */
 
@@ -211,10 +273,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  if (start_display_flag == 1)
 	  {
-		  start_display();
-		  start_display_flag = 0;
+		  switch(mode)
+		  {
+			  case DISPLAY_MODE_DATA_ONLY:
+				  start_display_data_only();
+				  start_display_flag = 0;
+				  break;
+
+			  case DISPLAY_MODE_WHOLE_FRAME:
+				  start_display_whole_frame();
+				  start_display_flag = 0;
+				  break;
+		  }
 	  }
 
     /* USER CODE END WHILE */
