@@ -61,16 +61,45 @@
 
   void start_display()
   {
-  	for(int i = 0; i <= 2; i++)
+	int choosen_color = WHITE;
+
+	int size = i2c_get_bytes_buffor_size();
+  	for(int i = 0; i < size; i++)
   	{
-  	  new_data = i2c_get_ready_i2c_byte();
-  	  sprintf(new_data_char, "Device address: 0x%X", new_data);
-  	 // fill_with(BLACK);
-  	  LCD_DisplayString( x, y, new_data_char, WHITE);
-  	  y = y + 10;
-  	  //LCD_DisplayString( 5, 5, device_address_char, WHITE);
-  	 // LCD_DisplayString( 5, 15, register_address_char, WHITE);
-  	 // LCD_DisplayString( 5, 25, iic_data_char, WHITE);
+  	  switch(i)
+  	  {
+		  case 0:
+		  	  new_data = i2c_get_ready_i2c_byte();
+		  	  sprintf(new_data_char, "Device address: 0x%X", new_data);
+		  	  choosen_color = RED;
+			  break;
+
+		  case 1:
+		  	  new_data = i2c_get_ready_i2c_byte();
+		  	  sprintf(new_data_char, "Register address: 0x%X", new_data);
+		  	  choosen_color = YELLOW;
+			  break;
+
+		  default:
+		  	  new_data = i2c_get_ready_i2c_byte();
+		  	  sprintf(new_data_char, "D:0x%X", new_data);
+		  	  choosen_color = WHITE;
+			  break;
+  	  }
+
+  	  LCD_DisplayString( x, y, new_data_char, choosen_color);
+
+  	  if(y + 10 < LCD_HEIGHT)
+  	  {
+  	      y = y + 10;
+  	  }
+  	  else
+  	  {
+  		  y = 30;
+  		  x = x + 35;
+  	  }
+
+
   	  lcd_copy();
   	  HAL_Delay(100);
   	}
@@ -81,6 +110,10 @@
   	{
   		new_data_char[i] = 0;
   	}
+
+  	fill_with(BLACK);
+  	y = 10;
+  	x = 10;
   }
 
   int start_display_flag = 0;
@@ -183,32 +216,7 @@ int main(void)
 		  start_display();
 		  start_display_flag = 0;
 	  }
-	 // if(i2c_is_data_ready() == CONVERSION_READY)//data_pointer >= 28)
-	//  {
-		/*  uint8_t device_address = 0;
-		  uint8_t register_address = 0;
-		  uint8_t iic_data = 0;
 
-		  char device_address_char[30];
-		  char register_address_char[30];
-		  char iic_data_char[30];
-
-		  uint8_t power = 0;*/
-
-		 /* for(int i = 0; i < 8; i++)
-		  {
-			  power = pow(2, 7 - i);
-			  device_address += data[i] * power;
-			  register_address += data[9 + i] * power;
-			  iic_data += data[18 + i] * power;
-		  }*/
-
-		 // sprintf(device_address_char, "Device address: 0x%X", device_address);
-		 // sprintf(register_address_char, "Register address: 0x%X", register_address);
-		//  sprintf(iic_data_char, "Data: 0x%X", iic_data);
-
-		  //data_pointer = 0;
-	 // }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

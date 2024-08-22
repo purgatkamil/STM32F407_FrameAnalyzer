@@ -35,5 +35,6 @@ i2c_tx_state i2c_check_for_start();
 i2c_tx_state i2c_check_for_stop();
 
 int i2c_get_ready_i2c_byte();
+int i2c_get_bytes_buffor_size();
 
 #endif /* INC_I2C_ANALYZE_H_ */

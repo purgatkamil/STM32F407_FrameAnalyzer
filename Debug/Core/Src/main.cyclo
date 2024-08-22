@@ -1,5 +1,5 @@
-../Core/Src/main.c:62:8:start_display	3
-../Core/Src/main.c:88:6:HAL_GPIO_EXTI_Callback	8
-../Core/Src/main.c:140:5:main	2
-../Core/Src/main.c:223:6:SystemClock_Config	3
-../Core/Src/main.c:273:6:Error_Handler	1
+../Core/Src/main.c:62:8:start_display	6
+../Core/Src/main.c:121:6:HAL_GPIO_EXTI_Callback	8
+../Core/Src/main.c:173:5:main	2
+../Core/Src/main.c:231:6:SystemClock_Config	3
+../Core/Src/main.c:281:6:Error_Handler	1
