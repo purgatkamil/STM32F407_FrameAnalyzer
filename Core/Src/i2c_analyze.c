@@ -9,7 +9,7 @@ volatile int i2c_next_byte_counter = 0;
 
 volatile int i2c_bytes_count_after_stop = 0;
 
-static i2c_conversion_state conversion = CONVERSION_NOT_READY;
+static i2c_conversion_state_e conversion = CONVERSION_NOT_READY;
 
 volatile int i2c_last_scl_bit_value = 1;
 
@@ -27,13 +27,13 @@ static void i2c_convert_i2c_byte()
 	conversion = CONVERSION_READY;
 }
 
-i2c_analyze_state i2c_read_data()
+i2c_analyze_state_e i2c_read_data()
 {
 	i2c_last_scl_bit_value = 1;
 	i2c_bits[i2c_bits_counter] = HAL_GPIO_ReadPin(ANALYZER_SDA_IT_RISING_GPIO_Port, ANALYZER_SDA_IT_RISING_Pin);
 
 
-	if ( ( ( i2c_bits_counter + OFFSET ) % ACK_BIT ) != 0 )
+	if ( ( ( i2c_bits_counter + ACK_OFFSET ) % ACK_BIT ) != 0 )
 	{
 		i2c_bits_counter++;
 		conversion = CONVERSION_NOT_READY;
@@ -47,7 +47,7 @@ i2c_analyze_state i2c_read_data()
 	}
 }
 
-i2c_conversion_state i2c_is_data_ready()
+i2c_conversion_state_e i2c_is_data_ready()
 {
 	if(i2c_bytes_counter > i2c_next_byte_counter)
 	{
@@ -63,7 +63,7 @@ int i2c_get_ready_i2c_byte()
 {
 	int temp = i2c_next_byte_counter;
 	i2c_next_byte_counter++;
-	i2c_conversion_state state = conversion;
+	i2c_conversion_state_e state = conversion;
 	if(state == CONVERSION_READY)
 	{
 		conversion = CONVERSION_NOT_READY;
@@ -72,9 +72,9 @@ int i2c_get_ready_i2c_byte()
 	return i2c_bytes[temp];
 }
 
-i2c_tx_state i2c_check_for_start()
+i2c_tx_state_e i2c_check_for_start()
 {
-	i2c_tx_state state;
+	i2c_tx_state_e state;
 
 	if(HAL_GPIO_ReadPin(ANALYZER_SCL_IT_RISING_GPIO_Port, ANALYZER_SCL_IT_RISING_Pin) == GPIO_PIN_SET)
 	{
@@ -91,9 +91,9 @@ i2c_tx_state i2c_check_for_start()
 	return state;
 }
 
-i2c_tx_state i2c_check_for_stop()
+i2c_tx_state_e i2c_check_for_stop()
 {
-	i2c_tx_state state;
+	i2c_tx_state_e state;
 
 	if(HAL_GPIO_ReadPin(ANALYZER_SCL_IT_RISING_GPIO_Port, ANALYZER_SCL_IT_RISING_Pin) == GPIO_PIN_SET)
 	{

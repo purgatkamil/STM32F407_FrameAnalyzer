@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := 001_FrameAnalyzerV1
+BUILD_ARTIFACT_NAME := STM32F407_FrameAnalyzer
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-001_FrameAnalyzerV1.elf \
+STM32F407_FrameAnalyzer.elf \
 
 MAP_FILES += \
-001_FrameAnalyzerV1.map \
+STM32F407_FrameAnalyzer.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-001_FrameAnalyzerV1.list \
+STM32F407_FrameAnalyzer.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: 001_FrameAnalyzerV1.elf secondary-outputs
+main-build: STM32F407_FrameAnalyzer.elf secondary-outputs
 
 # Tool invocations
-001_FrameAnalyzerV1.elf 001_FrameAnalyzerV1.map: $(OBJS) $(USER_OBJS) C:\Users\kamil\STM32CubeIDE\stm32f407_workspace_1.16.0\001_FrameAnalyzerV1\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "001_FrameAnalyzerV1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\kamil\STM32CubeIDE\stm32f407_workspace_1.16.0\001_FrameAnalyzerV1\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="001_FrameAnalyzerV1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32F407_FrameAnalyzer.elf STM32F407_FrameAnalyzer.map: $(OBJS) $(USER_OBJS) C:\Users\kamil\STM32CubeIDE\stm32f407_workspace_1.16.0\STM32F407_FrameAnalyzer\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STM32F407_FrameAnalyzer.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\kamil\STM32CubeIDE\stm32f407_workspace_1.16.0\STM32F407_FrameAnalyzer\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F407_FrameAnalyzer.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-001_FrameAnalyzerV1.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "001_FrameAnalyzerV1.list"
+STM32F407_FrameAnalyzer.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "STM32F407_FrameAnalyzer.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) 001_FrameAnalyzerV1.elf 001_FrameAnalyzerV1.list 001_FrameAnalyzerV1.map default.size.stdout
+	-$(RM) STM32F407_FrameAnalyzer.elf STM32F407_FrameAnalyzer.list STM32F407_FrameAnalyzer.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
