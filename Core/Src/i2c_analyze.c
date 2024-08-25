@@ -1,11 +1,11 @@
 #include <i2c_analyze.h>
 
-volatile static int i2c_bits[64];
-volatile static int i2c_bits_counter = 0;
+static i2c_bit_buffer_s i2c_bits;
+static int i2c_bits_counter = 0;
 
-volatile int i2c_bytes[100];
-volatile int i2c_bytes_counter = 0;
-volatile int i2c_next_byte_counter = 0;
+i2c_byte_buffer_s i2c_bytes;
+int i2c_bytes_counter = 0;
+int i2c_next_byte_counter = 0;
 
 volatile int i2c_bytes_count_after_stop = 0;
 
@@ -13,27 +13,68 @@ static i2c_conversion_state_e conversion = CONVERSION_NOT_READY;
 
 volatile int i2c_last_scl_bit_value = 1;
 
-static void i2c_convert_i2c_byte()
+void i2c_bit_buffer_init(i2c_bit_buffer_s *buffer)
+{
+	buffer->head = 0;
+	uint16_t i;
+	for (i=0; i < BIT_BUFFER_SIZE; i++){
+		buffer->data[i] = 0;
+	}
+}
+
+void i2c_bit_buffer_add(i2c_bit_buffer_s *buffer, uint16_t value)
+{
+    buffer->data[buffer->head] = value;
+    buffer->head = (buffer->head + 1) % BIT_BUFFER_SIZE;
+}
+
+void i2c_byte_buffer_init(i2c_byte_buffer_s *buffer)
+{
+	buffer->head = 0;
+	uint16_t i;
+	for (i=0; i < BYTE_BUFFER_SIZE; i++){
+		buffer->data[i] = 0;
+	}
+}
+
+void i2c_byte_buffer_add(i2c_byte_buffer_s *buffer, uint16_t value)
+{
+    buffer->data[buffer->head] = value;
+    buffer->head = (buffer->head + 1) % BYTE_BUFFER_SIZE;
+}
+
+void i2c_convert_i2c_byte()
 {
 	volatile int i2c_ready_byte = 0;
+	int counter = 0;
 
-	for(int i = 0; i < 8; i++)
+	for(int i = 0; i < i2c_bits.head; i++)
 	{
-		i2c_ready_byte += i2c_bits[7 - i] << i;
+		if ( ( ( i + ACK_OFFSET ) % ACK_BIT ) != 0 )
+		{
+			i2c_ready_byte += i2c_bits.data[i] << (7 - counter);
+			counter++;
+		}
+		else
+		{
+			i2c_byte_buffer_add(&i2c_bytes, i2c_ready_byte);
+			i2c_ready_byte = 0;
+			counter = 0;
+		}
 	}
-
-	i2c_bytes[i2c_bytes_counter] = i2c_ready_byte;
-	i2c_bytes_counter++;
 	conversion = CONVERSION_READY;
 }
 
-i2c_analyze_state_e i2c_read_data()
+void i2c_read_data()
 {
 	i2c_last_scl_bit_value = 1;
-	i2c_bits[i2c_bits_counter] = HAL_GPIO_ReadPin(ANALYZER_SDA_IT_RISING_GPIO_Port, ANALYZER_SDA_IT_RISING_Pin);
+
+	i2c_bit_buffer_add(&i2c_bits, HAL_GPIO_ReadPin(ANALYZER_SDA_IT_RISING_GPIO_Port, ANALYZER_SDA_IT_RISING_Pin));
+
+	//i2c_bits[i2c_bits_counter] = HAL_GPIO_ReadPin(ANALYZER_SDA_IT_RISING_GPIO_Port, ANALYZER_SDA_IT_RISING_Pin);
 
 
-	if ( ( ( i2c_bits_counter + ACK_OFFSET ) % ACK_BIT ) != 0 )
+	/*if ( ( ( i2c_bits.head + ACK_OFFSET ) % ACK_BIT ) != 0 )
 	{
 		i2c_bits_counter++;
 		conversion = CONVERSION_NOT_READY;
@@ -44,7 +85,7 @@ i2c_analyze_state_e i2c_read_data()
 		i2c_convert_i2c_byte();
 		i2c_bits_counter = 0;
 		return I2C_BYTE_SAVED;
-	}
+	}*/
 }
 
 i2c_conversion_state_e i2c_is_data_ready()
@@ -69,7 +110,7 @@ int i2c_get_ready_i2c_byte()
 		conversion = CONVERSION_NOT_READY;
 	}
 
-	return i2c_bytes[temp];
+	return i2c_bytes.data[temp];
 }
 
 i2c_tx_state_e i2c_check_for_start()
@@ -118,11 +159,8 @@ void i2c_scl_falling()
 
 void i2c_reset_all()
 {
-	for(int i = 0; i < 64; i++)
-	{
-		i2c_bits[i] = 0;
-		i2c_bytes[i] = 0;
-	}
+	i2c_bit_buffer_init(&i2c_bits);
+	i2c_byte_buffer_init(&i2c_bytes);
 
 	i2c_bits_counter = 0;
 
@@ -134,7 +172,7 @@ void i2c_reset_all()
 
 int i2c_get_bytes_buffor_size()
 {
-	return i2c_bytes_count_after_stop;
+	return i2c_bytes.head;
 }
 
 

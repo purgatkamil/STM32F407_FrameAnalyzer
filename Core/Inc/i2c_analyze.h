@@ -12,13 +12,13 @@
 #define BYTE_BUFFER_SIZE 100
 
 typedef struct {
-    int32_t data[BIT_BUFFER_SIZE];
-    int head;
+    volatile int32_t data[BIT_BUFFER_SIZE];
+    volatile int head;
 } i2c_bit_buffer_s;
 
 typedef struct {
-    int32_t data[BYTE_BUFFER_SIZE];
-    int head;
+    volatile int32_t data[BYTE_BUFFER_SIZE];
+    volatile int head;
 } i2c_byte_buffer_s;
 
 typedef enum{
@@ -38,13 +38,20 @@ typedef enum{
 	I2C_NO_TX,
 }i2c_tx_state_e;
 
-uint8_t i2c_read_data();
+void i2c_bit_buffer_init(i2c_bit_buffer_s *buffer);
+void i2c_bit_buffer_add(i2c_bit_buffer_s *buffer, uint16_t value);
+
+void i2c_byte_buffer_init(i2c_byte_buffer_s *buffer);
+void i2c_byte_buffer_add(i2c_byte_buffer_s *buffer, uint16_t value);
+
+
 
 void i2c_scl_falling();
 void i2c_reset_all();
 
 i2c_conversion_state_e i2c_is_data_ready();
-i2c_analyze_state_e i2c_read_data();
+void i2c_read_data();
+void i2c_convert_i2c_byte();
 
 i2c_tx_state_e i2c_check_for_start();
 i2c_tx_state_e i2c_check_for_stop();
