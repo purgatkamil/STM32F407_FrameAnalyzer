@@ -20,6 +20,7 @@
 #include "main.h"
 #include "dma.h"
 #include "spi.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -41,6 +42,8 @@ typedef enum{
 	DISPLAY_MODE_DATA_ONLY,
 	DISPLAY_MODE_WHOLE_FRAME,
 }display_mode;
+
+extern lcd_font_s fonts[5][3];
 
 /* USER CODE END PTD */
 
@@ -92,7 +95,7 @@ typedef enum{
   			  break;
     	  }
 
-    	  LCD_DisplayString( x, y, new_data_char, choosen_color);
+    	  LCD_DisplayString( x, y, new_data_char, choosen_color, LCD_FONT8);
 
 
     	  if(x + 25 < LCD_WIDTH)
@@ -150,7 +153,7 @@ typedef enum{
 			  break;
   	  }
 
-  	  LCD_DisplayString( x, y, new_data_char, choosen_color);
+  	  LCD_DisplayString( x, y, new_data_char, choosen_color, LCD_FONT8);
 
 
   	  if(y + 15 < LCD_HEIGHT)
@@ -225,6 +228,15 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+int8_t encoder_flag = 0;
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim == &htim14) {
+    	encoder_flag = 1;
+    }
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -258,7 +270,13 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
+  MX_TIM2_Init();
+  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  uint32_t old_value = 0;
+
 
   lcd_init();
   fill_with(BLACK);
@@ -288,6 +306,30 @@ int main(void)
 				  break;
 		  }
 	  }
+
+	  int32_t value = __HAL_TIM_GET_COUNTER(&htim2);
+	  char value_char[10];
+
+	  if (old_value != value)
+	  {
+		HAL_TIM_Base_Stop_IT(&htim14);
+		__HAL_TIM_SET_COUNTER(&htim14, 0);
+
+		LCD_DisplayString( LCD_WIDTH - 30, LCD_HEIGHT - 30, value_char, BLACK, LCD_FONT16);
+	    old_value = value;
+
+	  	sprintf(value_char, "%ld", value);
+	  	LCD_DisplayString( LCD_WIDTH - 30, LCD_HEIGHT - 30, value_char, GREEN, LCD_FONT16);
+
+	  	HAL_TIM_Base_Start_IT(&htim14);
+	  }
+
+	  	if(encoder_flag == 1)
+	  	{
+	  		HAL_TIM_Base_Stop_IT(&htim14);
+	  		lcd_copy();
+	  		encoder_flag = 0;
+	  	}
 
     /* USER CODE END WHILE */
 
