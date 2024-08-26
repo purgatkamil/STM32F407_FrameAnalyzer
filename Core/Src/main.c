@@ -187,12 +187,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		case ANALYZER_SCL_IT_RISING_Pin:
 
 			i2c_read_data();
-		    __HAL_GPIO_EXTI_CLEAR_IT(ANALYZER_SCL_IT_RISING_Pin);
 		    break;
 
 		case ANALYZER_SCL_IT_FALLING_Pin:
 			i2c_scl_falling();
-			__HAL_GPIO_EXTI_CLEAR_IT(ANALYZER_SCL_IT_FALLING_Pin);
 		    break;
 
 		case ANALYZER_SDA_IT_RISING_Pin:
@@ -201,17 +199,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				i2c_convert_i2c_byte();
 				start_display_flag = 1;
 			}
-			__HAL_GPIO_EXTI_CLEAR_IT(ANALYZER_SDA_IT_RISING_Pin);
 		    break;
 
 		case ANALYZER_SDA_IT_FALLING_Pin:
 			i2c_check_for_start();
-			__HAL_GPIO_EXTI_CLEAR_IT(ANALYZER_SDA_IT_FALLING_Pin);
 		    break;
 
 		default:
 		    break;
 	}
+
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
 }
 
 

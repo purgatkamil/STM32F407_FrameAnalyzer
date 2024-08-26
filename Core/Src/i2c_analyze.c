@@ -70,22 +70,6 @@ void i2c_read_data()
 	i2c_last_scl_bit_value = 1;
 
 	i2c_bit_buffer_add(&i2c_bits, HAL_GPIO_ReadPin(ANALYZER_SDA_IT_RISING_GPIO_Port, ANALYZER_SDA_IT_RISING_Pin));
-
-	//i2c_bits[i2c_bits_counter] = HAL_GPIO_ReadPin(ANALYZER_SDA_IT_RISING_GPIO_Port, ANALYZER_SDA_IT_RISING_Pin);
-
-
-	/*if ( ( ( i2c_bits.head + ACK_OFFSET ) % ACK_BIT ) != 0 )
-	{
-		i2c_bits_counter++;
-		conversion = CONVERSION_NOT_READY;
-		return I2C_BIT_SAVED;
-	}
-	else
-	{
-		i2c_convert_i2c_byte();
-		i2c_bits_counter = 0;
-		return I2C_BYTE_SAVED;
-	}*/
 }
 
 i2c_conversion_state_e i2c_is_data_ready()
