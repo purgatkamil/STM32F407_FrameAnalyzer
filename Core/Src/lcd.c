@@ -31,8 +31,6 @@
 #define FONT_WIDTH 5
 #define FONT_HEIGHT 8
 
-
-
 static uint16_t frame_buffer[LCD_WIDTH * LCD_HEIGHT];
 
 static void lcd_send_command(uint8_t cmd)
@@ -55,14 +53,18 @@ static void lcd_send_data(uint8_t data)
 
 static void lcd_send(uint16_t value)
 {
-	if (value & 0x100) {
+	if (value & 0x100)
+	{
 		lcd_send_command(value);
-	} else {
+	}
+	else
+	{
 		lcd_send_data(value);
 	}
 }
 
-static const uint16_t init_table[] = {
+static const uint16_t init_table[] =
+{
   CMD(ST7735S_FRMCTR1), 0x01, 0x2c, 0x2d,
   CMD(ST7735S_FRMCTR2), 0x01, 0x2c, 0x2d,
   CMD(ST7735S_FRMCTR3), 0x01, 0x2c, 0x2d, 0x01, 0x2c, 0x2d,
@@ -92,7 +94,8 @@ void lcd_init(void)
   HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_SET);
   HAL_Delay(100);
 
-  for (i = 0; i < sizeof(init_table) / sizeof(init_table[0]); i++) {
+  for (i = 0; i < sizeof(init_table) / sizeof(init_table[0]); i++)
+  {
     lcd_send(init_table[i]);
   }
 
@@ -126,10 +129,12 @@ void lcd_put_pixel(int x, int y, uint16_t color)
 	frame_buffer[x + y * LCD_WIDTH] = color;
 }
 
-void fill_with(uint16_t color){
+void fill_with(uint16_t color)
+{
 
 	 int i = LCD_WIDTH * LCD_HEIGHT - 1;
-	 while(i >= 0){
+	 while(i >= 0)
+	 {
 		frame_buffer[i] = color;
 		--i;
 	 }
@@ -157,41 +162,51 @@ bool lcd_is_busy(void)
 		return false;
 }
 
-void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t Color) {
+void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t Color)
+{
     const uint8_t Font_Width = FONT_WIDTH; // Szerokość czcionki
     const uint8_t Font_Height = FONT_HEIGHT; // Wysokość czcionki
 
     uint32_t Char_Offset = (Acsii_Char - ' ') * Font_Height * (Font_Width / 8 + (Font_Width % 8 ? 1 : 0));
     const unsigned char* ptr = &Font8_Table[Char_Offset];
 
-    for (uint16_t Page = 0; Page < Font_Height; Page++) {
-        for (uint16_t Column = 0; Column < Font_Width; Column++) {
-            if (*ptr & (0x80 >> (Column % 8))) {
+    for (uint16_t Page = 0; Page < Font_Height; Page++)
+    {
+        for (uint16_t Column = 0; Column < Font_Width; Column++)
+        {
+            if (*ptr & (0x80 >> (Column % 8)))
+            {
                 lcd_put_pixel(Xpoint + Column, Ypoint + Page, Color);
             }
 
-            if (Column % 8 == 7) {
+            if (Column % 8 == 7)
+            {
                 ptr++;
             }
         }
 
-        if (Font_Width % 8 != 0) {
+        if (Font_Width % 8 != 0)
+        {
             ptr++;
         }
     }
 }
 
-void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t Color) {
+void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t Color)
+{
     const uint8_t Font_Width = FONT_WIDTH; // Szerokość czcionki
     const uint8_t Font_Height = FONT_HEIGHT; // Wysokość czcionki
 
-    while (*pString != '\0') {
-        if (Xstart + Font_Width > LCD_WIDTH) {
+    while (*pString != '\0')
+    {
+        if (Xstart + Font_Width > LCD_WIDTH)
+        {
             Xstart = 0;
             Ystart += Font_Height;
         }
 
-        if (Ystart + Font_Height > LCD_HEIGHT) {
+        if (Ystart + Font_Height > LCD_HEIGHT)
+        {
             break; // Wyjście z pętli, jeśli przekroczy wysokość ekranu
         }
 
@@ -203,7 +218,8 @@ void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t
 
 void LCD_DrawLine ( int Xstart, int Ystart,
 					int Xend, int Yend,
-					uint16_t color){
+					uint16_t color)
+{
 
 
 	int Xpoint = Xstart;
@@ -218,17 +234,20 @@ void LCD_DrawLine ( int Xstart, int Ystart,
 	//Cumulative error
 	int Esp = dx + dy;
 
-	for (;;){
+	for (;;)
+	{
 		//Painted dotted line, 2 point is really virtual
 
 		lcd_put_pixel(Xpoint, Ypoint, color);
 
-        if (2 * Esp >= dy) {
+        if (2 * Esp >= dy)
+        {
 			if (Xpoint == Xend) break;
             Esp += dy;
 			Xpoint += XAddway;
         }
-        if (2 * Esp <= dx) {
+        if (2 * Esp <= dx)
+        {
 			if (Ypoint == Yend) break;
             Esp += dx;
 			Ypoint += YAddway;
@@ -236,7 +255,8 @@ void LCD_DrawLine ( int Xstart, int Ystart,
 	}
 }
 
-void lcd_fill_box(int x1, int y1, int x2, int y2, uint16_t color) {
+void lcd_fill_box(int x1, int y1, int x2, int y2, uint16_t color)
+{
     // Ensure coordinates are within the screen bounds
     if (x1 < 0) x1 = 0;
     if (y1 < 0) y1 = 0;
@@ -244,17 +264,23 @@ void lcd_fill_box(int x1, int y1, int x2, int y2, uint16_t color) {
     if (y2 >= LCD_HEIGHT) y2 = LCD_HEIGHT - 1;
 
     // Iterate over each pixel in the specified rectangle
-    for (int x = x1; x <= x2; x++) {
-        for (int y = y1; y <= y2; y++) {
+    for (int x = x1; x <= x2; x++)
+    {
+        for (int y = y1; y <= y2; y++)
+        {
             lcd_put_pixel(x, y, color);
         }
     }
 }
 
-void lcd_draw_horizontal_line(int x, uint16_t color){
-	for(int i = 1; i <= LCD_WIDTH - 1; i++){
+void lcd_draw_horizontal_line(int x, uint16_t color)
+{
+	for(int i = 1; i <= LCD_WIDTH - 1; i++)
+	{
 		if(i % 2 != 0)
+		{
 			lcd_put_pixel(i, LCD_HEIGHT - x, color);
+		}
 	}
 }
 
@@ -282,7 +308,8 @@ void LCD_DrawCircle ( 	int X_Center, int Y_Center, int Radius, uint16_t color)
 	//Cumulative error,judge the next point of the logo
 	int16_t Esp = 3 - ( Radius << 1 );
 
-		while ( XCurrent <= YCurrent ){
+		while ( XCurrent <= YCurrent )
+		{
 			lcd_put_pixel ( X_Center + XCurrent, Y_Center + YCurrent, color);             //1
 			lcd_put_pixel ( X_Center - XCurrent, Y_Center + YCurrent, color);             //2
 			lcd_put_pixel ( X_Center - YCurrent, Y_Center + XCurrent, color);             //3
@@ -293,11 +320,15 @@ void LCD_DrawCircle ( 	int X_Center, int Y_Center, int Radius, uint16_t color)
 			lcd_put_pixel ( X_Center + YCurrent, Y_Center + XCurrent, color);             //0
 
 			if ( Esp < 0 )
+			{
 				Esp += 4 * XCurrent + 6;
-			else{
+			}
+			else
+			{
 				Esp += 10 + 4 * ( XCurrent - YCurrent );
 				YCurrent --;
 			}
+
 			XCurrent ++;
 		}
 	}

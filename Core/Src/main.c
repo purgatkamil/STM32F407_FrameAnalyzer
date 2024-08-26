@@ -196,7 +196,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		case ANALYZER_SDA_IT_RISING_Pin:
 			if(i2c_check_for_stop() == I2C_STOP)
 			{
-				i2c_convert_i2c_byte();
+				i2c_convert_i2c_bytes();
 				start_display_flag = 1;
 			}
 		    break;

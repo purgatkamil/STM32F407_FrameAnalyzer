@@ -13,7 +13,7 @@ static i2c_conversion_state_e conversion = CONVERSION_NOT_READY;
 
 volatile int i2c_last_scl_bit_value = 1;
 
-void i2c_bit_buffer_init(i2c_bit_buffer_s *buffer)
+static void i2c_bit_buffer_init(i2c_bit_buffer_s *buffer)
 {
 	buffer->head = 0;
 	uint16_t i;
@@ -22,13 +22,13 @@ void i2c_bit_buffer_init(i2c_bit_buffer_s *buffer)
 	}
 }
 
-void i2c_bit_buffer_add(i2c_bit_buffer_s *buffer, uint16_t value)
+static void i2c_bit_buffer_add(i2c_bit_buffer_s *buffer, uint16_t value)
 {
     buffer->data[buffer->head] = value;
     buffer->head = (buffer->head + 1) % BIT_BUFFER_SIZE;
 }
 
-void i2c_byte_buffer_init(i2c_byte_buffer_s *buffer)
+static void i2c_byte_buffer_init(i2c_byte_buffer_s *buffer)
 {
 	buffer->head = 0;
 	uint16_t i;
@@ -37,13 +37,13 @@ void i2c_byte_buffer_init(i2c_byte_buffer_s *buffer)
 	}
 }
 
-void i2c_byte_buffer_add(i2c_byte_buffer_s *buffer, uint16_t value)
+static void i2c_byte_buffer_add(i2c_byte_buffer_s *buffer, uint16_t value)
 {
     buffer->data[buffer->head] = value;
     buffer->head = (buffer->head + 1) % BYTE_BUFFER_SIZE;
 }
 
-void i2c_convert_i2c_byte()
+void i2c_convert_i2c_bytes()
 {
 	volatile int i2c_ready_byte = 0;
 	int counter = 0;
