@@ -1,8 +1,8 @@
+#include <font.h>
 #include "lcd.h"
 #include "spi.h"
 #include <math.h>
 
-#include "font8.h"
 
 #define LCD_OFFSET_X  1
 #define LCD_OFFSET_Y  2
@@ -30,6 +30,15 @@
 
 #define FONT_WIDTH 5
 #define FONT_HEIGHT 8
+
+lcd_font_s fonts[5][3] =
+{
+	{{Font8_Table, 8, 5}},
+	{{Font12_Table, 12, 7}},
+	{{Font16_Table, 16, 11}},
+	{{Font20_Table, 20, 14}},
+	{{Font24_Table, 24, 17}}
+};
 
 static uint16_t frame_buffer[LCD_WIDTH * LCD_HEIGHT];
 
@@ -162,13 +171,13 @@ bool lcd_is_busy(void)
 		return false;
 }
 
-void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t Color)
+void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t Color, lcd_font_e font_type)
 {
-    const uint8_t Font_Width = FONT_WIDTH; // Szerokość czcionki
-    const uint8_t Font_Height = FONT_HEIGHT; // Wysokość czcionki
+    uint8_t Font_Width = fonts[font_type]->width; // Szerokość czcionki
+    uint8_t Font_Height = fonts[font_type]->height; // Wysokość czcionki
 
     uint32_t Char_Offset = (Acsii_Char - ' ') * Font_Height * (Font_Width / 8 + (Font_Width % 8 ? 1 : 0));
-    const unsigned char* ptr = &Font8_Table[Char_Offset];
+    unsigned char* ptr = (fonts[font_type]->font_add) + Char_Offset;//&Font8_Table[Char_Offset];
 
     for (uint16_t Page = 0; Page < Font_Height; Page++)
     {
@@ -192,10 +201,10 @@ void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t
     }
 }
 
-void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t Color)
+void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t Color, lcd_font_e font_type)
 {
-    const uint8_t Font_Width = FONT_WIDTH; // Szerokość czcionki
-    const uint8_t Font_Height = FONT_HEIGHT; // Wysokość czcionki
+    uint8_t Font_Width = fonts[font_type]->width; // Szerokość czcionki
+    uint8_t Font_Height = fonts[font_type]->height; // Wysokość czcionki
 
     while (*pString != '\0')
     {
@@ -210,7 +219,7 @@ void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t
             break; // Wyjście z pętli, jeśli przekroczy wysokość ekranu
         }
 
-        LCD_DisplayChar(Xstart, Ystart, *pString, Color);
+        LCD_DisplayChar(Xstart, Ystart, *pString, Color, font_type);
         pString++;
         Xstart += Font_Width;
     }

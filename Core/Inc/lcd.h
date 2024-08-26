@@ -16,6 +16,20 @@
 #define CYAN			0xff07
 #define WHITE			0xffff
 
+typedef struct{
+	unsigned char* font_add;
+	int height;
+	int width;
+}lcd_font_s;
+
+typedef enum{
+	LCD_FONT8,
+	LCD_FONT12,
+	LCD_FONT16,
+	LCD_FONT20,
+	LCD_FONT24,
+}lcd_font_e;
+
 void lcd_init(void);
 void lcd_put_pixel(int x, int y, uint16_t color);
 void lcd_copy(void); // Przesłanie zawartości bufora
@@ -25,8 +39,8 @@ bool lcd_is_busy(void);
 
 void LCD_DrawLine(int Xstart, int Ystart, int Xend, int Yend, uint16_t color);
 void fill_with(uint16_t color);
-void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t Color);
-void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t Color);
+void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t Color, lcd_font_e font_type);
+void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t Color, lcd_font_e font_type);
 void lcd_draw_horizontal_line(int x, uint16_t color);
 void lcd_draw_circle(int x, int y, int r);
 
