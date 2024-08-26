@@ -28,6 +28,7 @@
 
 #include "lcd.h"
 #include "i2c_analyze.h"
+#include "hci.h"
 
 #include <math.h>
 #include <string.h>
@@ -181,36 +182,79 @@ extern lcd_font_s fonts[5][3];
   	x = 5;
   }
 
+  extern int menu_flag;
+
+  extern int8_t encoder_flag;
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim == &htim13)
+    {
+    	if(menu_flag == 1)
+    	{
+    		menu_flag = 0;
+    	}
+    	else
+    	{
+    		menu_flag = 1;
+    	}
+    	HAL_TIM_Base_Stop_IT(&htim13);
+    }
+
+    if (htim == &htim14) {
+    	encoder_flag = 1;
+    }
+}
+
 int start_display_flag = 0;
+
+extern volatile int analyse_mode;
+
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	switch(GPIO_Pin)
+	if(GPIO_Pin == ENCODER_BUTTON_Pin)
 	{
-		case ANALYZER_SCL_IT_RISING_Pin:
-
-			i2c_read_data();
-		    break;
-
-		case ANALYZER_SCL_IT_FALLING_Pin:
-			i2c_scl_falling();
-		    break;
-
-		case ANALYZER_SDA_IT_RISING_Pin:
-			if(i2c_check_for_stop() == I2C_STOP)
-			{
-				i2c_convert_i2c_bytes();
-				start_display_flag = 1;
-			}
-		    break;
-
-		case ANALYZER_SDA_IT_FALLING_Pin:
-			i2c_check_for_start();
-		    break;
-
-		default:
-		    break;
+		HAL_TIM_Base_Start_IT(&htim13);
+		if(menu_flag == 1)
+		{
+			hci_hide_menu();
+		}
+		else
+		{
+			hci_display_menu();
+		}
 	}
+
+	if(menu_flag != 1)
+	{
+		switch(GPIO_Pin)
+		{
+			case ANALYZER_SCL_IT_RISING_Pin:
+				i2c_read_data();
+			    break;
+
+			case ANALYZER_SCL_IT_FALLING_Pin:
+				i2c_scl_falling();
+			    break;
+
+			case ANALYZER_SDA_IT_RISING_Pin:
+				if(i2c_check_for_stop() == I2C_STOP)
+				{
+					i2c_convert_i2c_bytes();
+					start_display_flag = 1;
+				}
+			    break;
+
+			case ANALYZER_SDA_IT_FALLING_Pin:
+				i2c_check_for_start();
+			    break;
+
+			default:
+			    break;
+		}
+	}
+
 
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
 }
@@ -227,15 +271,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-int8_t encoder_flag = 0;
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    if (htim == &htim14) {
-    	encoder_flag = 1;
-    }
-}
 
 /* USER CODE END 0 */
 
@@ -272,10 +307,10 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM2_Init();
   MX_TIM14_Init();
+  MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
-  uint32_t old_value = 0;
+  hci_encoder_init();
 
 
   lcd_init();
@@ -290,7 +325,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
 	  if (start_display_flag == 1)
 	  {
 		  switch(mode)
@@ -307,29 +341,11 @@ int main(void)
 		  }
 	  }
 
-	  int32_t value = __HAL_TIM_GET_COUNTER(&htim2);
-	  char value_char[10];
+	  hci_scroll();
 
-	  if (old_value != value)
-	  {
-		HAL_TIM_Base_Stop_IT(&htim14);
-		__HAL_TIM_SET_COUNTER(&htim14, 0);
 
-		LCD_DisplayString( LCD_WIDTH - 30, LCD_HEIGHT - 30, value_char, BLACK, LCD_FONT16);
-	    old_value = value;
 
-	  	sprintf(value_char, "%ld", value);
-	  	LCD_DisplayString( LCD_WIDTH - 30, LCD_HEIGHT - 30, value_char, GREEN, LCD_FONT16);
 
-	  	HAL_TIM_Base_Start_IT(&htim14);
-	  }
-
-	  	if(encoder_flag == 1)
-	  	{
-	  		HAL_TIM_Base_Stop_IT(&htim14);
-	  		lcd_copy();
-	  		encoder_flag = 0;
-	  	}
 
     /* USER CODE END WHILE */
 
