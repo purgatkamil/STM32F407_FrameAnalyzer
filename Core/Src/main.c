@@ -33,6 +33,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -182,23 +183,22 @@ extern lcd_font_s fonts[5][3];
   	x = 5;
   }
 
-  extern int menu_flag;
-
-  extern int8_t encoder_flag;
+bool menu_flag = false;
+extern int8_t encoder_flag;
+int debounce_active = 0;
+//extern hci_menu_where_go_next where_to_go;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim == &htim13)
     {
-    	if(menu_flag == 1)
-    	{
-    		menu_flag = 0;
-    	}
-    	else
-    	{
-    		menu_flag = 1;
-    	}
     	HAL_TIM_Base_Stop_IT(&htim13);
+    	debounce_active = 0;
+
+    	if(HAL_GPIO_ReadPin(ENCODER_BUTTON_GPIO_Port, ENCODER_BUTTON_Pin) == GPIO_PIN_RESET)
+    	{
+    		hci_menu();
+    	}
     }
 
     if (htim == &htim14) {
@@ -208,25 +208,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 int start_display_flag = 0;
 
-extern volatile int analyse_mode;
+extern volatile hci_analyse_mode analyse_mode;
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == ENCODER_BUTTON_Pin)
 	{
-		HAL_TIM_Base_Start_IT(&htim13);
-		if(menu_flag == 1)
-		{
-			hci_hide_menu();
-		}
-		else
-		{
-			hci_display_menu();
-		}
+        if (debounce_active == 0)
+        {
+            debounce_active = 1;
+            HAL_TIM_Base_Start_IT(&htim13);
+        }
 	}
 
-	if(menu_flag != 1)
+	if(analyse_mode == HCI_I2C_MODE && menu_flag == false)
 	{
 		switch(GPIO_Pin)
 		{
@@ -341,7 +337,11 @@ int main(void)
 		  }
 	  }
 
-	  hci_scroll();
+	  if(menu_flag == true)
+	  {
+		  hci_scroll();
+	  }
+
 
 
 
