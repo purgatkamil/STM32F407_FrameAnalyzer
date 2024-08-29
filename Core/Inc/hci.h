@@ -1,14 +1,17 @@
-/*
- * hci.h
- *
- *  Created on: Aug 26, 2024
- *      Author: KP
- */
-
 #ifndef INC_HCI_H_
 #define INC_HCI_H_
 
+#include <lcd_menu.h>
 #include "lcd.h"
+
+#include "tim.h"
+#include "stdio.h"
+#include "stdbool.h"
+
+typedef enum{
+	DISPLAY_MODE_DATA_ONLY,
+	DISPLAY_MODE_WHOLE_FRAME,
+}display_mode;
 
 typedef enum
 {
@@ -32,5 +35,7 @@ void hci_scroll();
 void hci_encoder_init();
 void hci_hide_menu();
 void hci_menu();
+void hci_i2c_data_only_mode();
+void hci_i2c_whole_frame_mode();
 
 #endif /* INC_HCI_H_ */

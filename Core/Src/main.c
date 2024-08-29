@@ -26,7 +26,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "lcd.h"
 #include "i2c_analyze.h"
 #include "hci.h"
 
@@ -40,10 +39,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-typedef enum{
-	DISPLAY_MODE_DATA_ONLY,
-	DISPLAY_MODE_WHOLE_FRAME,
-}display_mode;
+
 
 extern lcd_font_s fonts[5][3];
 
@@ -186,7 +182,9 @@ extern lcd_font_s fonts[5][3];
 bool menu_flag = false;
 extern int8_t encoder_flag;
 int debounce_active = 0;
-//extern hci_menu_where_go_next where_to_go;
+
+extern volatile int menu_opened;
+
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -197,7 +195,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     	if(HAL_GPIO_ReadPin(ENCODER_BUTTON_GPIO_Port, ENCODER_BUTTON_Pin) == GPIO_PIN_RESET)
     	{
-    		hci_menu();
+    		if(menu_opened == 1)
+    		{
+    			menu_enter();
+    			menu_refresh()
+;    		}
+    		else
+    		{
+    			hci_display_menu();
+    		}
     	}
     }
 
@@ -209,7 +215,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 int start_display_flag = 0;
 
 extern volatile hci_analyse_mode analyse_mode;
-
+extern volatile bool hci_i2c_flag;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -222,7 +228,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         }
 	}
 
-	if(analyse_mode == HCI_I2C_MODE && menu_flag == false)
+	if(hci_i2c_flag == true)
 	{
 		switch(GPIO_Pin)
 		{
@@ -306,6 +312,7 @@ int main(void)
   MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
+
   hci_encoder_init();
 
 
@@ -313,7 +320,7 @@ int main(void)
   fill_with(BLACK);
   lcd_copy();
 
-  display_mode mode = DISPLAY_MODE_WHOLE_FRAME;
+  extern display_mode mode;
 
   /* USER CODE END 2 */
 
@@ -323,6 +330,7 @@ int main(void)
   {
 	  if (start_display_flag == 1)
 	  {
+		  fill_with(BLACK);
 		  switch(mode)
 		  {
 			  case DISPLAY_MODE_DATA_ONLY:
@@ -337,7 +345,7 @@ int main(void)
 		  }
 	  }
 
-	  if(menu_flag == true)
+	  if(menu_opened == 1)
 	  {
 		  hci_scroll();
 	  }

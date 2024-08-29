@@ -1,8 +1,4 @@
-#include <font.h>
 #include "lcd.h"
-#include "spi.h"
-#include <math.h>
-
 
 #define LCD_OFFSET_X  1
 #define LCD_OFFSET_Y  2

@@ -1,8 +1,12 @@
 #ifndef INC_LCD_H_
 #define INC_LCD_H_
 
+#include "spi.h"
+#include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "font.h"
 
 #define LCD_WIDTH	160
 #define LCD_HEIGHT	128
