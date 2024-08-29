@@ -66,7 +66,7 @@ extern lcd_font_s fonts[5][3];
   int y = 5;
 
   void start_display_whole_frame()
-    {
+  {
   	int choosen_color = WHITE;
 
   	int size = i2c_get_bytes_buffor_size();
@@ -95,14 +95,12 @@ extern lcd_font_s fonts[5][3];
 
     	  LCD_DisplayString( x, y, new_data_char, choosen_color, LCD_FONT8);
 
-
     	  if(x + 25 < LCD_WIDTH)
     	  {
     	      x = x + 22;
     	  }
     	  else
     	  {
-
     		  x = 5;
     		  y = y + 15;
     	  }
@@ -123,8 +121,8 @@ extern lcd_font_s fonts[5][3];
     	x = 5;
     }
 
-  void start_display_data_only()
-  {
+void start_display_data_only()
+{
 	int choosen_color = WHITE;
 
 	int size = i2c_get_bytes_buffor_size();
@@ -177,12 +175,10 @@ extern lcd_font_s fonts[5][3];
   	fill_with(BLACK);
   	y = 5;
   	x = 5;
-  }
+}
 
-bool menu_flag = false;
 extern int8_t encoder_flag;
 int debounce_active = 0;
-
 extern volatile int menu_opened;
 
 
@@ -213,8 +209,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 int start_display_flag = 0;
-
-extern volatile hci_analyse_mode analyse_mode;
 extern volatile bool hci_i2c_flag;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -256,7 +250,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			    break;
 		}
 	}
-
 
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
 }

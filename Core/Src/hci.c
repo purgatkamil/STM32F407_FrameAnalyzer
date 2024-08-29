@@ -9,8 +9,6 @@
 int8_t encoder_flag = 0;
 uint32_t old_encoder_value = 0;
 
-extern bool menu_flag;
-
 void hci_encoder_init()
 {
 	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
