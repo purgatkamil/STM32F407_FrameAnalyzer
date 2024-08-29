@@ -21,15 +21,13 @@ volatile int menu_opened = 0;
 
 void hci_display_menu()
 {
+	menu_reset();
 	menu_opened = 1;
 	menu_refresh();
 }
 
-extern uint8_t menu_index;
 void hci_hide_menu()
 {
-	menu_back();
-	menu_back();
 	menu_opened = 0;
 	fill_with(BLACK);
 	lcd_copy();

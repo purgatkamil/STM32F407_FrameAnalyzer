@@ -41,5 +41,6 @@ void menu_next(void);
 void menu_prev(void);
 void menu_enter(void);
 void menu_back(void);
+void menu_reset(void);
 
 #endif /* INC_LCD_MENU_H_ */

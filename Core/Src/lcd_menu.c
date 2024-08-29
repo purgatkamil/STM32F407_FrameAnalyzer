@@ -112,7 +112,6 @@ void menu_refresh(void)
 	}
 
 	lcd_copy();
-	HAL_TIM_Base_Start_IT(&htim14);
 }
 
 void menu_next(void)
@@ -225,5 +224,11 @@ void menu_back(void)
 		currentPointer = currentPointer->parent;
 		menu_index = menu_get_index(currentPointer);
 	}
+}
+
+void menu_reset(void)
+{
+	currentPointer = &menu1;
+	menu_index = menu_get_index(currentPointer);
 }
 
