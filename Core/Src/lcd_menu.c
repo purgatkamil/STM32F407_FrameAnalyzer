@@ -230,5 +230,6 @@ void menu_reset(void)
 {
 	currentPointer = &menu1;
 	menu_index = menu_get_index(currentPointer);
+	lcd_row_pos = 0;
 }
 

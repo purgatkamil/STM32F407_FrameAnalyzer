@@ -2,6 +2,7 @@
 #define INC_LCD_H_
 
 #include "spi.h"
+
 #include <math.h>
 #include <stdint.h>
 #include <stdbool.h>

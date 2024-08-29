@@ -198,8 +198,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     		if(menu_opened == 1)
     		{
     			menu_enter();
-    			menu_refresh()
-;    		}
+    			menu_refresh();
+    		}
     		else
     		{
     			hci_display_menu();
@@ -349,11 +349,6 @@ int main(void)
 	  {
 		  hci_scroll();
 	  }
-
-
-
-
-
 
     /* USER CODE END WHILE */
 
