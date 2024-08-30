@@ -62,8 +62,10 @@
   int y = 5;
 
 extern i2c_bit_buffer_s i2c_bits;
+extern i2c_byte_buffer_s i2c_bytes;
 
 #define BITS_ON_SCREEN 32
+#define ALIGN_TO_TABLE 1
 
 typedef struct
 {
@@ -73,7 +75,7 @@ typedef struct
 
 lcd_buffer_s lcd_buffer;
 
-int counter = 32 - 1;
+int last_displayed_bit_cnt = BITS_ON_SCREEN - ALIGN_TO_TABLE;
 
 void lcd_buffer_init(lcd_buffer_s *buffer)
 {
@@ -116,6 +118,7 @@ int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
 
 	for(int i = 0; i < BITS_ON_SCREEN; i++)
 	{
+
 		int state = lcd_buffer_read_from_head(&lcd_buffer, i);
 
 		if(state == 0)
@@ -131,9 +134,9 @@ int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
 		{
 			lcd_draw_vertical_line(i * one_bit_lcd_size, 10, 31, WHITE);
 		}
-		if( ( (i - counter) != 0) && ( (i  % 8) == 0) )
+		if( ( (i - last_displayed_bit_cnt) != 0) && ( (i  % 8) == 0) )
 		{
-			lcd_draw_vertical_line_dotted( (i - counter) * one_bit_lcd_size, 5, 37, RED);
+			lcd_draw_vertical_line_dotted( (i - last_displayed_bit_cnt) * one_bit_lcd_size, 5, 37, RED);
 		}
 		last_state = state;
 
@@ -154,18 +157,18 @@ int whole_frame_flag = 0;
   	if(scroll_result == 1)
   	{
   		int size = i2c_get_bits_buffor_size();
-  		if(counter < size)
+  		if(last_displayed_bit_cnt < size)
   		{
-  			counter++;
-  			lcd_buffer_add_next(&lcd_buffer, i2c_bits.data[counter]);
+  			last_displayed_bit_cnt++;
+  			lcd_buffer_add_next(&lcd_buffer, i2c_bits.data[last_displayed_bit_cnt]);
   		}
   	}
   	else if(scroll_result == -1)
   	{
-  		if((counter - BITS_ON_SCREEN) > 0)
+  		if((last_displayed_bit_cnt - BITS_ON_SCREEN) > 0)
   		{
-  	  		lcd_buffer_add_previous(&lcd_buffer, i2c_bits.data[counter - BITS_ON_SCREEN]);
-  	  		counter--;
+  	  		lcd_buffer_add_previous(&lcd_buffer, i2c_bits.data[last_displayed_bit_cnt - BITS_ON_SCREEN]);
+  	  		last_displayed_bit_cnt--;
   		}
 
   	}
@@ -373,12 +376,15 @@ int main(void)
   lcd_copy();
 
   extern display_mode mode;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+
 	  if (start_display_flag == 1)
 	  {
 		  fill_with(BLACK);
