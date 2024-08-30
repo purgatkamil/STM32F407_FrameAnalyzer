@@ -11,27 +11,26 @@
 #define BIT_BUFFER_SIZE 1000	// (( 8 bits + ACK bit ) * 100 bytes available to store ) + 100 just in case
 #define BYTE_BUFFER_SIZE 100
 
-typedef struct {
+typedef struct
+{
     volatile int32_t data[BIT_BUFFER_SIZE];
     volatile int head;
-} i2c_bit_buffer_s;
+}i2c_bit_buffer_s;
 
-typedef struct {
+typedef struct
+{
     volatile int32_t data[BYTE_BUFFER_SIZE];
     volatile int head;
-} i2c_byte_buffer_s;
+}i2c_byte_buffer_s;
 
-typedef enum{
-	I2C_BIT_SAVED,
-	I2C_BYTE_SAVED,
-}i2c_analyze_state_e;
-
-typedef enum{
+typedef enum
+{
 	CONVERSION_NOT_READY,
 	CONVERSION_READY,
 }i2c_conversion_state_e;
 
-typedef enum{
+typedef enum
+{
 	I2C_STOP,
 	I2C_START,
 	I2C_DATA,

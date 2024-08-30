@@ -61,7 +61,7 @@
   int x = 5;
   int y = 5;
 
-#define BITS_ON_SCREEN 16
+#define BITS_ON_SCREEN 32
 
   void start_display_whole_frame()
   {
@@ -89,6 +89,10 @@
 		if(last_state != state)
 		{
 			lcd_draw_vertical_line(i * one_bit_lcd_size, 10, 31, WHITE);
+		}
+		if( (i != 0) && ( (i  % 8) == 0) )
+		{
+			lcd_draw_vertical_line_dotted(i * one_bit_lcd_size, 5, 37, RED);
 		}
 		last_state = state;
 

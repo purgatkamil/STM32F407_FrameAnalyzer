@@ -58,7 +58,10 @@ void LCD_DisplayChar(uint16_t Xpoint, uint16_t Ypoint, char Acsii_Char, uint16_t
 void LCD_DisplayString(uint16_t Xstart, uint16_t Ystart, char* pString, uint16_t Color, lcd_font_e font_type);
 
 void lcd_draw_horizontal_line(int y, int x_start, int x_stop, uint16_t color);
+void lcd_draw_horizontal_line_dotted(int y, int x_start, int x_stop, uint16_t color);
+
 void lcd_draw_vertical_line(int x, int y_start, int y_stop, uint16_t color);
+void lcd_draw_vertical_line_dotted(int x, int y_start, int y_stop, uint16_t color);
 
 void LCD_DrawCircle ( 	int X_Center, int Y_Center, int Radius, uint16_t color);
 

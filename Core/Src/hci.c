@@ -1,11 +1,5 @@
 #include "hci.h"
 
-#define MENU_START_X 20
-#define MENU_START_Y 5
-
-#define CURSOR_START_X 5
-#define CURSOR_START_Y 5
-
 int8_t encoder_flag = 0;
 uint32_t old_encoder_value = 0;
 

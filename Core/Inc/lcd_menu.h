@@ -17,7 +17,6 @@ struct menu_struct {
 	menu_t * child;
 	menu_t * parent;
 	void (*menu_function)(void);
-
 };
 
 extern menu_t menu1;

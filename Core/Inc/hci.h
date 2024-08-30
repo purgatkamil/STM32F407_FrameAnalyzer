@@ -10,7 +10,8 @@
 
 extern volatile int scroll_result;
 
-typedef enum{
+typedef enum
+{
 	DISPLAY_MODE_DATA_ONLY,
 	DISPLAY_MODE_WHOLE_FRAME,
 }display_mode;
@@ -22,15 +23,6 @@ typedef enum
 	HCI_SPI_MODE,
 	HCI_UART_MODE,
 }hci_analyse_mode;
-
-typedef enum
-{
-	HCI_GOTO_MENU,
-	HCI_GOTO_I2C,
-	HCI_GOTO_SPI,
-	HCI_GOTO_UART,
-	HCI_EXIT,
-}hci_menu_where_go_next;
 
 int hci_scroll();
 

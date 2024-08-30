@@ -290,6 +290,28 @@ void lcd_draw_vertical_line(int x, int y_start, int y_stop, uint16_t color)
 	}
 }
 
+void lcd_draw_horizontal_line_dotted(int y, int x_start, int x_stop, uint16_t color)
+{
+	for(int i = x_start; i <= x_stop; i++)
+	{
+		if((i % 2) != 0)
+		{
+			lcd_put_pixel(i, y, color);
+		}
+	}
+}
+
+void lcd_draw_vertical_line_dotted(int x, int y_start, int y_stop, uint16_t color)
+{
+	for(int i = y_start; i < y_stop; i++)
+	{
+		if((i % 2) != 0)
+		{
+			lcd_put_pixel(x, i, color);
+		}
+	}
+}
+
 void LCD_DrawCircle ( 	int X_Center, int Y_Center, int Radius, uint16_t color)
 {
 	//Draw a circle from (0, R) as a starting point
