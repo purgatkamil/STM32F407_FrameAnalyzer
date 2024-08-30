@@ -1,8 +1,5 @@
 #include "lcd.h"
 
-#define LCD_OFFSET_X  1
-#define LCD_OFFSET_Y  2
-
 #define ST7735S_SLPOUT			0x11
 #define ST7735S_DISPOFF			0x28
 #define ST7735S_DISPON			0x29
@@ -278,28 +275,18 @@ void lcd_fill_box(int x1, int y1, int x2, int y2, uint16_t color)
     }
 }
 
-void lcd_draw_horizontal_line(int x, uint16_t color)
+void lcd_draw_horizontal_line(int y, int x_start, int x_stop, uint16_t color)
 {
-	for(int i = 1; i <= LCD_WIDTH - 1; i++)
+	for(int i = x_start; i <= x_stop; i++)
 	{
-		if(i % 2 != 0)
-		{
-			lcd_put_pixel(i, LCD_HEIGHT - x, color);
-		}
+		lcd_put_pixel(i, y, color);
 	}
 }
 
-void lcd_draw_circle(int x, int y, int r)
+void lcd_draw_vertical_line(int x, int y_start, int y_stop, uint16_t color)
 {
-	for(int i = -r; i <= r; i++)
-	{
-		for(int j = -r; j <= r; j++)
-		{
-			if( ( pow(i, 2) + pow(j, 2) ) == pow(r, 2) )
-			{
-				lcd_put_pixel(i + ( LCD_WIDTH / 2 ), j + (LCD_HEIGHT / 2), WHITE);
-			}
-		}
+	for(int i = y_start; i < y_stop; i++){
+		lcd_put_pixel(x, i, color);
 	}
 }
 
