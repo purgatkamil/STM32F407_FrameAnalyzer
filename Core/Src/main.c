@@ -320,9 +320,11 @@ int main(void)
 		  }
 	  }
 
+	  hci_scroll();
+
 	  if(menu_opened == 1)
 	  {
-		  hci_scroll();
+		  menu_scrolling();
 	  }
 
     /* USER CODE END WHILE */

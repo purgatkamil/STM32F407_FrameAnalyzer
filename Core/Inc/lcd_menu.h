@@ -42,5 +42,6 @@ void menu_prev(void);
 void menu_enter(void);
 void menu_back(void);
 void menu_reset(void);
+void menu_scrolling();
 
 #endif /* INC_LCD_MENU_H_ */

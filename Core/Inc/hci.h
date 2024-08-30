@@ -8,6 +8,8 @@
 #include "stdio.h"
 #include "stdbool.h"
 
+extern volatile int scroll_result;
+
 typedef enum{
 	DISPLAY_MODE_DATA_ONLY,
 	DISPLAY_MODE_WHOLE_FRAME,
@@ -30,12 +32,17 @@ typedef enum
 	HCI_EXIT,
 }hci_menu_where_go_next;
 
+int hci_scroll();
+
 void hci_display_menu();
-void hci_scroll();
 void hci_encoder_init();
 void hci_hide_menu();
 void hci_menu();
 void hci_i2c_data_only_mode();
 void hci_i2c_whole_frame_mode();
+
+int hci_return_delay_timer_state();
+void hci_start_delay_timer();
+void hci_reset_delay_timer();
 
 #endif /* INC_HCI_H_ */

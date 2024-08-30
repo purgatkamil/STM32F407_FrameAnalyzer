@@ -233,3 +233,21 @@ void menu_reset(void)
 	lcd_row_pos = 0;
 }
 
+void menu_scrolling()
+{
+		if(scroll_result == 1)
+		{
+			menu_next();
+		}
+		else if(scroll_result == -1)
+		{
+			menu_prev();
+		}
+
+	  if(hci_return_delay_timer_state() == 1)
+	  {
+		  menu_refresh();
+	  }
+}
+
+
