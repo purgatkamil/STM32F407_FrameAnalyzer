@@ -141,6 +141,8 @@ void i2c_scl_falling()
 	i2c_last_scl_bit_value = 1;
 }
 
+int readed_data = 0;
+
 void i2c_reset_all()
 {
 	i2c_bit_buffer_init(&i2c_bits);
@@ -151,12 +153,35 @@ void i2c_reset_all()
 	i2c_bytes_counter = 0;
 	i2c_next_byte_counter = 0;
 
+	readed_data = 0;
+
 	conversion = CONVERSION_NOT_READY;
 }
 
 int i2c_get_bytes_buffor_size()
 {
 	return i2c_bytes.head;
+}
+
+int i2c_get_bits_buffor_size()
+{
+	return i2c_bits.head;
+}
+
+
+
+int i2c_get_ready_bits()
+{
+	int result = 0;
+
+	if(readed_data <= i2c_bits.head)
+	{
+		result = i2c_bits.data[readed_data];
+	}
+
+	readed_data++;
+
+	return result;
 }
 
 

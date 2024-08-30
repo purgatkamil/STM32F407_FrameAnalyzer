@@ -48,7 +48,12 @@ void i2c_convert_i2c_bytes();
 i2c_tx_state_e i2c_check_for_start();
 i2c_tx_state_e i2c_check_for_stop();
 
+
+int i2c_get_ready_bits();
+int i2c_get_bits_buffor_size();
+
 int i2c_get_ready_i2c_byte();
 int i2c_get_bytes_buffor_size();
+
 
 #endif /* INC_I2C_ANALYZE_H_ */
