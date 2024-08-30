@@ -13,6 +13,7 @@ volatile int menu_opened = 0;
 
 void hci_display_menu()
 {
+	fill_with(BLACK);
 	menu_reset();
 	menu_opened = 1;
 	menu_refresh();

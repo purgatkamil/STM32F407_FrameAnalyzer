@@ -1,6 +1,6 @@
 #include <i2c_analyze.h>
 
-static i2c_bit_buffer_s i2c_bits;
+i2c_bit_buffer_s i2c_bits;
 static int i2c_bits_counter = 0;
 
 i2c_byte_buffer_s i2c_bytes;
@@ -182,6 +182,11 @@ int i2c_get_ready_bits()
 	readed_data++;
 
 	return result;
+}
+
+void i2c_reset_readed_data()
+{
+	readed_data = 0;
 }
 
 

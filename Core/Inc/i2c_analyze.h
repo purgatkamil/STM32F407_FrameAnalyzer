@@ -54,5 +54,7 @@ int i2c_get_bits_buffor_size();
 int i2c_get_ready_i2c_byte();
 int i2c_get_bytes_buffor_size();
 
+void i2c_reset_readed_data();
+
 
 #endif /* INC_I2C_ANALYZE_H_ */

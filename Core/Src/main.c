@@ -61,21 +61,62 @@
   int x = 5;
   int y = 5;
 
+extern i2c_bit_buffer_s i2c_bits;
+
 #define BITS_ON_SCREEN 32
+
+typedef struct
+{
+	int data[BITS_ON_SCREEN];
+	int head;
+}lcd_buffer_s;
+
+lcd_buffer_s lcd_buffer;
+
+int counter = 32 - 1;
+
+void lcd_buffer_init(lcd_buffer_s *buffer)
+{
+	buffer->head = BITS_ON_SCREEN - 1;
+  	uint16_t i;
+  	for (i = 0; i < BITS_ON_SCREEN; i++){
+  		buffer->data[i] = i2c_bits.data[i];
+  	}
+}
+
+void lcd_buffer_add_next(lcd_buffer_s *buffer, uint16_t value)
+{
+    buffer->data[buffer->head] = value;
+    buffer->head = (buffer->head + 1) % BITS_ON_SCREEN;
+}
+
+void lcd_buffer_add_previous(lcd_buffer_s *buffer, uint16_t value)
+{
+	buffer->data[buffer->head] = value;
+    buffer->head = (buffer->head - 1 + BITS_ON_SCREEN) % BITS_ON_SCREEN;
+}
+
+int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
+{
+	int cnt = ( (buffer->head) + index) % BITS_ON_SCREEN;
+    int result = buffer->data[cnt];
+
+    return result;
+}
 
   void start_display_whole_frame()
   {
+	fill_with(BLACK);
+
 	lcd_draw_horizontal_line(10, 0, LCD_WIDTH - LCD_OFFSET_Y, WHITE);
 	lcd_draw_horizontal_line(30, 0, LCD_WIDTH - LCD_OFFSET_Y, WHITE);
 	const int one_bit_lcd_size = LCD_WIDTH / BITS_ON_SCREEN;
 
 	int last_state = 0;
 
-	int size = i2c_get_bits_buffor_size();
 	for(int i = 0; i < BITS_ON_SCREEN; i++)
 	{
-		int state = i2c_get_ready_bits();
-
+		int state = lcd_buffer_read_from_head(&lcd_buffer, i);
 
 		if(state == 0)
 		{
@@ -90,9 +131,9 @@
 		{
 			lcd_draw_vertical_line(i * one_bit_lcd_size, 10, 31, WHITE);
 		}
-		if( (i != 0) && ( (i  % 8) == 0) )
+		if( ( (i - counter) != 0) && ( (i  % 8) == 0) )
 		{
-			lcd_draw_vertical_line_dotted(i * one_bit_lcd_size, 5, 37, RED);
+			lcd_draw_vertical_line_dotted( (i - counter) * one_bit_lcd_size, 5, 37, RED);
 		}
 		last_state = state;
 
@@ -101,11 +142,39 @@
 	lcd_copy();
 	HAL_Delay(10);
 
-	i2c_reset_all();
+	//i2c_reset_all();
+    }
 
+int whole_frame_flag = 0;
+
+  void whole_frame_scrolling()
+  {
 	fill_with(BLACK);
 
+  	if(scroll_result == 1)
+  	{
+  		int size = i2c_get_bits_buffor_size();
+  		if(counter < size)
+  		{
+  			counter++;
+  			lcd_buffer_add_next(&lcd_buffer, i2c_bits.data[counter]);
+  		}
+  	}
+  	else if(scroll_result == -1)
+  	{
+  		if((counter - BITS_ON_SCREEN) > 0)
+  		{
+  	  		lcd_buffer_add_previous(&lcd_buffer, i2c_bits.data[counter - BITS_ON_SCREEN]);
+  	  		counter--;
+  		}
+
+  	}
+
+    if( (hci_return_delay_timer_state() == 1) && (whole_frame_flag == 1) )
+    {
+  	  start_display_whole_frame();
     }
+  }
 
 void start_display_data_only()
 {
@@ -168,6 +237,7 @@ int debounce_active = 0;
 extern volatile int menu_opened;
 
 
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim == &htim13)
@@ -184,6 +254,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     		}
     		else
     		{
+    			whole_frame_flag = 0;
+    			i2c_reset_all();
     			hci_display_menu();
     		}
     	}
@@ -224,6 +296,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				if(i2c_check_for_stop() == I2C_STOP)
 				{
 					i2c_convert_i2c_bytes();
+					lcd_buffer_init(&lcd_buffer);
 					start_display_flag = 1;
 				}
 			    break;
@@ -300,7 +373,6 @@ int main(void)
   lcd_copy();
 
   extern display_mode mode;
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -319,6 +391,7 @@ int main(void)
 
 			  case DISPLAY_MODE_WHOLE_FRAME:
 				  start_display_whole_frame();
+				  whole_frame_flag = 1;
 				  start_display_flag = 0;
 				  break;
 		  }
@@ -330,6 +403,12 @@ int main(void)
 	  {
 		  menu_scrolling();
 	  }
+
+	  if(whole_frame_flag == 1)
+	  {
+		  whole_frame_scrolling();
+	  }
+
 
     /* USER CODE END WHILE */
 
