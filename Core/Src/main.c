@@ -39,10 +39,6 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-
-
-extern lcd_font_s fonts[5][3];
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -65,60 +61,46 @@ extern lcd_font_s fonts[5][3];
   int x = 5;
   int y = 5;
 
+#define BITS_ON_SCREEN 16
+
   void start_display_whole_frame()
   {
-  	int choosen_color = WHITE;
+	lcd_draw_horizontal_line(10, 0, LCD_WIDTH - LCD_OFFSET_Y, WHITE);
+	lcd_draw_horizontal_line(30, 0, LCD_WIDTH - LCD_OFFSET_Y, WHITE);
+	const int one_bit_lcd_size = LCD_WIDTH / BITS_ON_SCREEN;
 
-  	int size = i2c_get_bytes_buffor_size();
-    	for(int i = 0; i < size; i++)
-    	{
-    	  switch(i)
-    	  {
-  		  case 0:
-  		  	  new_data = i2c_get_ready_i2c_byte();
-  		  	  sprintf(new_data_char, "0x%02X", new_data);
-  		  	  choosen_color = RED;
-  			  break;
+	int last_state = 0;
 
-  		  case 1:
-  		  	  new_data = i2c_get_ready_i2c_byte();
-  		  	  sprintf(new_data_char, "0x%02X", new_data);
-  		  	  choosen_color = YELLOW;
-  			  break;
+	int size = i2c_get_bits_buffor_size();
+	for(int i = 0; i < BITS_ON_SCREEN; i++)
+	{
+		int state = i2c_get_ready_bits();
 
-  		  default:
-  		  	  new_data = i2c_get_ready_i2c_byte();
-  		  	  sprintf(new_data_char, "0x%02X", new_data);
-  		  	  choosen_color = WHITE;
-  			  break;
-    	  }
 
-    	  LCD_DisplayString( x, y, new_data_char, choosen_color, LCD_FONT8);
+		if(state == 0)
+		{
+			lcd_draw_horizontal_line(10, (i * one_bit_lcd_size) + 1, ((i+1) * one_bit_lcd_size), BLACK);
+		}
+		else if(state == 1)
+		{
+			lcd_draw_horizontal_line(30, (i * one_bit_lcd_size) + 1, ((i+1) * one_bit_lcd_size), BLACK);
+		}
 
-    	  if(x + 25 < LCD_WIDTH)
-    	  {
-    	      x = x + 22;
-    	  }
-    	  else
-    	  {
-    		  x = 5;
-    		  y = y + 15;
-    	  }
-    	}
+		if(last_state != state)
+		{
+			lcd_draw_vertical_line(i * one_bit_lcd_size, 10, 31, WHITE);
+		}
+		last_state = state;
 
-    	lcd_copy();
-    	HAL_Delay(10);
+	}
 
-    	i2c_reset_all();
-    	new_data = 0;
-    	for(int i = 0; i < 30; i++)
-    	{
-    		new_data_char[i] = 0;
-    	}
+	lcd_copy();
+	HAL_Delay(10);
 
-    	fill_with(BLACK);
-    	y = 5;
-    	x = 5;
+	i2c_reset_all();
+
+	fill_with(BLACK);
+
     }
 
 void start_display_data_only()
