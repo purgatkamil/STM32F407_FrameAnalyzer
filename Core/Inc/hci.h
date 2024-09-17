@@ -3,6 +3,7 @@
 
 #include <lcd_menu.h>
 #include "lcd.h"
+#include "lcd_buffer.h"
 
 #include "tim.h"
 #include "stdio.h"

@@ -64,51 +64,13 @@
 extern i2c_bit_buffer_s i2c_bits;
 extern i2c_byte_buffer_s i2c_bytes;
 
-#define BITS_ON_SCREEN 32
-#define ALIGN_TO_TABLE 1
-
-typedef struct
-{
-	int data[BITS_ON_SCREEN];
-	int head;
-}lcd_buffer_s;
-
 lcd_buffer_s lcd_buffer;
 
 int last_displayed_bit_cnt = BITS_ON_SCREEN - ALIGN_TO_TABLE;
 int displayed_bit_counter = 0;
 
-void lcd_buffer_init(lcd_buffer_s *buffer)
+void start_display_whole_frame()
 {
-	buffer->head = BITS_ON_SCREEN - 1;
-  	uint16_t i;
-  	for (i = 0; i < BITS_ON_SCREEN; i++){
-  		buffer->data[i] = i2c_bits.data[i];
-  	}
-}
-
-void lcd_buffer_add_next(lcd_buffer_s *buffer, uint16_t value)
-{
-    buffer->data[buffer->head] = value;
-    buffer->head = (buffer->head + 1) % BITS_ON_SCREEN;
-}
-
-void lcd_buffer_add_previous(lcd_buffer_s *buffer, uint16_t value)
-{
-	buffer->data[buffer->head] = value;
-    buffer->head = (buffer->head - 1 + BITS_ON_SCREEN) % BITS_ON_SCREEN;
-}
-
-int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
-{
-	int cnt = ( (buffer->head) + index) % BITS_ON_SCREEN;
-    int result = buffer->data[cnt];
-
-    return result;
-}
-
-  void start_display_whole_frame()
-  {
 	fill_with(BLACK);
 
 	const int one_bit_lcd_size = LCD_WIDTH / BITS_ON_SCREEN;
@@ -135,7 +97,7 @@ int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
 		}
 		if( ( ( ( i + displayed_bit_counter) * 5) % 40) == 0)
 		{
-			lcd_draw_vertical_line(i * 5, 5, 38, RED);
+			lcd_draw_vertical_line(i * one_bit_lcd_size, 5, 38, RED);
 		}
 
 		last_state = state;
@@ -143,9 +105,7 @@ int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
 
 	lcd_copy();
 	HAL_Delay(10);
-
-	//i2c_reset_all();
-    }
+}
 
 int whole_frame_flag = 0;
 
@@ -300,6 +260,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				{
 					i2c_convert_i2c_bytes();
 					lcd_buffer_init(&lcd_buffer);
+				  	for (int i = 0; i < BITS_ON_SCREEN; i++){
+				  		lcd_buffer.data[i] = i2c_bits.data[i];
+				  	}
 					start_display_flag = 1;
 				}
 			    break;
