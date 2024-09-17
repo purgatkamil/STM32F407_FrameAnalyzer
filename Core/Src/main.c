@@ -76,6 +76,7 @@ typedef struct
 lcd_buffer_s lcd_buffer;
 
 int last_displayed_bit_cnt = BITS_ON_SCREEN - ALIGN_TO_TABLE;
+int displayed_bit_counter = 0;
 
 void lcd_buffer_init(lcd_buffer_s *buffer)
 {
@@ -110,8 +111,6 @@ int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
   {
 	fill_with(BLACK);
 
-	lcd_draw_horizontal_line(10, 0, LCD_WIDTH - LCD_OFFSET_Y, WHITE);
-	lcd_draw_horizontal_line(30, 0, LCD_WIDTH - LCD_OFFSET_Y, WHITE);
 	const int one_bit_lcd_size = LCD_WIDTH / BITS_ON_SCREEN;
 
 	int last_state = 0;
@@ -121,25 +120,25 @@ int lcd_buffer_read_from_head(lcd_buffer_s *buffer, int index)
 
 		int state = lcd_buffer_read_from_head(&lcd_buffer, i);
 
-		if(state == 0)
+		if(state == 1)
 		{
-			lcd_draw_horizontal_line(10, (i * one_bit_lcd_size) + 1, ((i+1) * one_bit_lcd_size), BLACK);
+			lcd_draw_horizontal_line(10, (i * one_bit_lcd_size) + 1, ((i+1) * one_bit_lcd_size), WHITE);
 		}
-		else if(state == 1)
+		else if(state == 0)
 		{
-			lcd_draw_horizontal_line(30, (i * one_bit_lcd_size) + 1, ((i+1) * one_bit_lcd_size), BLACK);
+			lcd_draw_horizontal_line(30, (i * one_bit_lcd_size) + 1, ((i+1) * one_bit_lcd_size), WHITE);
 		}
 
 		if(last_state != state)
 		{
 			lcd_draw_vertical_line(i * one_bit_lcd_size, 10, 31, WHITE);
 		}
-		if( ( (i - last_displayed_bit_cnt) != 0) && ( (i  % 8) == 0) )
+		if( ( ( ( i + displayed_bit_counter) * 5) % 40) == 0)
 		{
-			lcd_draw_vertical_line_dotted( (i - last_displayed_bit_cnt) * one_bit_lcd_size, 5, 37, RED);
+			lcd_draw_vertical_line(i * 5, 5, 38, RED);
 		}
-		last_state = state;
 
+		last_state = state;
 	}
 
 	lcd_copy();
@@ -160,6 +159,7 @@ int whole_frame_flag = 0;
   		if(last_displayed_bit_cnt < size)
   		{
   			last_displayed_bit_cnt++;
+  			displayed_bit_counter++;
   			lcd_buffer_add_next(&lcd_buffer, i2c_bits.data[last_displayed_bit_cnt]);
   		}
   	}
@@ -169,8 +169,8 @@ int whole_frame_flag = 0;
   		{
   	  		lcd_buffer_add_previous(&lcd_buffer, i2c_bits.data[last_displayed_bit_cnt - BITS_ON_SCREEN]);
   	  		last_displayed_bit_cnt--;
+  	  		displayed_bit_counter--;
   		}
-
   	}
 
     if( (hci_return_delay_timer_state() == 1) && (whole_frame_flag == 1) )
